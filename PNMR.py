@@ -27,7 +27,7 @@ T1Params.add('T1',value=3e-3,min=0,vary=True)
 
 T1Fit = T1Model.fit(Amplitude,params=T1Params,time=Times,weights=1./AmplitudeError)
 print(T1Fit.fit_report())
-T1Fit.plot(show_init=False,yerr=AmplitudeError,xlabel='Time (s)',ylabel='Net Magnetisation')
+T1Fit.plot(show_init=False,yerr=AmplitudeError,xlabel='Time (s)',ylabel='Net Magnetisation',title="Light Minearal Oil T1")
 plt.show()
 #plt.show(block=False)
 
@@ -53,7 +53,23 @@ T1HMOParams.add('T1',value=3e-3,min=0,vary=True)
 
 T1HMOFit = T1HMOModel.fit(AmplitudeHMO,params=T1HMOParams,time=TimesHMO,weights=1./AmplitudeErrorHMO)
 print(T1Fit.fit_report())
-T1HMOFit.plot(show_init=False,yerr=AmplitudeErrorHMO,xlabel='Time (s)',ylabel='Net Magnetisation')
+T1HMOFit.plot(show_init=False,yerr=AmplitudeErrorHMO,xlabel='Time (s)',ylabel='Net Magnetisation',title="Heavy Minearal Oil T1")
 plt.show(block=False)
 
 
+#! Glycerin T1 decay times
+TimesGlycerin = np.concatenate((np.linspace(10,32,23), np.linspace(34,58,25))) *1e-3
+AmplitudeGlycerin = np.array( [ -3.56,-3.37,-3.16,-2.94,-2.78,-2.59,-2.43,-2.28,-2.12,-1.94,-1.78,-1.65,-1.50,-1.35,-1.18,-1.05,-0.905,-0.776,-0.640,-0.496,-0.370,-0.241,-0.119, \
+    0.122,0.227,0.350,0.455,0.567,0.673,0.773,0.882,0.973,1.07,1.16,1.25,1.35,1.45,1.52,1.62,1.68,1.76,1.85,1.93,1.98,2.05,2.12,2.20,2.24] )
+AmplitudeErrorGlycerin = np.array([0.02]*48)
+
+T1GlycerinModel = Model(T1Func)
+T1GlycerinParams = Parameters()
+
+T1GlycerinParams.add('M0',value=7,min=0,vary=True)
+T1GlycerinParams.add('T1',value=3e-3,min=0,vary=True)
+
+T1GlycerinFit = T1GlycerinModel.fit(AmplitudeGlycerin,params=T1GlycerinParams,time=TimesGlycerin,weights=1./AmplitudeErrorGlycerin)
+print(T1GlycerinFit.fit_report())
+T1GlycerinFit.plot(show_init=False,yerr=AmplitudeErrorGlycerin,xlabel='Time (s)',ylabel='Net Magnetisation',title="Glycerin T1")
+plt.show(block=False)
