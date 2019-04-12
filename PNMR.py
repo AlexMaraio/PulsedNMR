@@ -37,3 +37,23 @@ MaxAmp = [6.91,7.42,7.81,8.19,8.51,8.77,9.02,9.22,9.41,9.54,9.73,9.86,9.98,10.0,
 
 plt.plot(Periods,MaxAmp)
 plt.show()
+
+
+#! Heavy mineral oil T1 decay time
+TimesHMO = np.concatenate((np.linspace(0.0010,0.0220,22), np.linspace(0.0240,0.0600,37)))
+AmplitudeHMO = np.array( [ -6.16,-5.74,-5.37,-5.02,-4.68,-4.32,-3.98,-3.65,-3.37,-3.06,-2.77,-2.50,-2.26,-1.99,-1.77,-1.56,-1.36,-1.10,-0.881,-0.686,-0.492,-0.310, \
+    0.152,0.330,0.498,0.660,0.808,0.951,1.10,1.23,1.37,1.50,1.63,1.74,1.84,1.96,2.07,2.15,2.26,2.35,2.44,2.53,2.63,2.71,2.79,2.87,2.96,3.03,3.11,3.19,3.27,3.32,3.41,3.47,3.54,3.61,3.65,3.72,3.78 ])
+AmplitudeErrorHMO = np.array([0.02]*59)
+
+T1HMOModel = Model(T1Func)
+T1HMOParams = Parameters()
+
+T1HMOParams.add('M0',value=7,min=0,vary=True)
+T1HMOParams.add('T1',value=3e-3,min=0,vary=True)
+
+T1HMOFit = T1HMOModel.fit(AmplitudeHMO,params=T1HMOParams,time=TimesHMO,weights=1./AmplitudeErrorHMO)
+print(T1Fit.fit_report())
+T1HMOFit.plot(show_init=False,yerr=AmplitudeErrorHMO,xlabel='Time (s)',ylabel='Net Magnetisation')
+plt.show(block=False)
+
+
