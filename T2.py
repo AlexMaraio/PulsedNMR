@@ -8,6 +8,8 @@ import scipy.stats as scistats
 from lmfit import Model, Parameters
 import pandas as pd
 import scipy.signal as scisig
+from termcolor import cprint #* coloured terminal printing -- might be a pain on windows *_*
+
 
 TitleFont = {'size':'24', 'color':'black', 'weight':'bold'} 
 AxTitleFont = {'size':'16'}
@@ -101,19 +103,11 @@ def onclick_main(event):
     plt.axhline(y=event.ydata,xmin=(event.x/width)-0.2,xmax=(event.x/width))
     plt.draw()
 
-#def onclick_individual(event):
-#    print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-#            ('double' if event.dblclick else 'single', event.button,
-#            event.x, event.y, event.xdata, event.ydata))
-    #Xdata.append(event.xdata)
-    #Ydata.append(event.ydata)
-
 
 #* Imports the light mineral oil data from a .CSV file
 DataDF =  pd.read_csv("./Data/T2/LMOThurs11Data.csv",names = ['Time','Voltage'],usecols = [3,4])
-#DataDF['Time'] = DataDF['Time'] -0.00010
 
-
+#* Plots the light mineral oul data, so that way the location of the peaks can be found.
 fig1, ax1 = plt.subplots()
 ax1.plot(DataDF['Time'],DataDF['Voltage'])
 cursor = SnaptoCursor(ax1, DataDF['Time'], DataDF['Voltage'])
@@ -135,6 +129,8 @@ plt.ylabel('Voltage (V)')
 DataTime = ParamsPltX 
 DataAmp = ParamsPltY
 
+#! Start of actual data fitting that is useful!
+
 #* Last 9 data points for light minearal oil
 DataTime = np.array( [ 98.40,114.70,131.20,147.50,163.60,180.2,196.50,213.10,229.40]) *1e-3
 DataAmp = np.array( [ 1.15,0.94,0.81,0.65,0.56,0.50,0.41,0.37,0.31] )
@@ -145,7 +141,7 @@ DataAmp2 = np.array( [ 5.40,3.87,2.84,2.15] )
 
 plt.plot(DataTime,DataAmp,'gx')
 plt.plot(DataTime2,DataAmp2,'yx')
-plt.show()
+plt.show(block=False)
 
 # Fitting a single exponential function to the last nine data points for light minearal oil
 T2Model = Model(T2Func)
@@ -153,8 +149,9 @@ T2Params = Parameters()
 T2Params.add('A',value=4.60,min=1e-10,vary=True)
 T2Params.add('T2',value=0.073,min=1e-10,vary=True)
 T2Fit = T2Model.fit(DataAmp,params=T2Params,time=DataTime,weights=1/0.02)
+cprint('Light mineral oil, single exponential, last nine',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(T2Fit.fit_report())
-T2Fit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000)
+T2Fit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Light mineral oil - Single exponential - last nine')
 plt.show(block=False)
 
 # Now fitting a single exponential function, but now to the first four data points for LMO for comparison
@@ -163,20 +160,21 @@ T2Params2 = Parameters()
 T2Params2.add('A',value=4.60,min=1e-10,vary=True)
 T2Params2.add('T2',value=0.073,min=1e-10,vary=True)
 T2Fit2 = T2Model2.fit(DataAmp2,params=T2Params2,time=DataTime2,weights=1/0.02)
+cprint('Light mineral oil, single exponential, first four',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(T2Fit2.fit_report())
-T2Fit2.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000)
+T2Fit2.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Light mineral oil - Single exponential - first four')
 plt.show(block=False)
 
 
 #* Plotting the comparison of the different fits
-plt.figure(4)
+plt.figure()
 plt.plot(DataDF['Time'],DataDF['Voltage'])
 plt.plot(DataDF['Time'],T2Func(DataDF['Time'],T2Fit.best_values['A'],T2Fit.best_values['T2']))
 plt.plot(DataDF['Time'],T2Func(DataDF['Time'],T2Fit2.best_values['A'],T2Fit2.best_values['T2']))
 plt.title('Two-pulse spin-echo experiments to find T2')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
-plt.show(block=True)
+plt.show(block=False)
 
 
 #? Now fitting the addition of the two exponential functions for comparison
@@ -185,7 +183,20 @@ plt.show(block=True)
 DataTimeFull = np.array( [ 0.10,16.30,32.80,49.0, 65.50, 81.80,   98.40,114.70,131.20,147.50,163.60,180.2,196.50,213.10,229.40]) *1e-3
 DataAmpFull = np.array( [ 5.40,3.87,2.84,2.15, 1.72, 1.37, 1.15,0.94,0.81,0.65,0.56,0.50,0.41,0.37,0.31] )
 
+#* Single exponential fit, all data
+T2ModelSingle = Model(T2Func) 
+T2ParamsSingle = Parameters()
 
+T2ParamsSingle.add('A',value=4,min=1e-10,vary=True)
+T2ParamsSingle.add('T2',value=0.01,min=1e-10,vary=True)
+
+T2FitSingle = T2ModelSingle.fit(DataAmpFull,params=T2ParamsSingle,time=DataTimeFull,weights=1/0.02)
+cprint('Light mineral oil, one exponentials, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(T2FitSingle.fit_report())
+T2FitSingle.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Light mineral oil - Single exponential - all data')
+plt.show(block=False)
+
+#* Double exponential fit, all data
 T2ModelSum = Model(TwoExponential) 
 T2ParamsSum = Parameters()
 
@@ -195,18 +206,21 @@ T2ParamsSum.add('A2',value=5,min=1e-10,vary=True)
 T2ParamsSum.add('T2_2',value=0.1,min=1e-10,vary=True)
 
 T2FitSum = T2ModelSum.fit(DataAmpFull,params=T2ParamsSum,time=DataTimeFull,weights=1/0.02)
+cprint('Light mineral oil, two exponentials, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print('\n Summation of two peaks fit, light minearal oil \n' + T2FitSum.fit_report())
-T2FitSum.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000)
+T2FitSum.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Light mineral oil - Two exponentials - all data')
 plt.show(block=False)
 
+
 #* Plotting the comparisons between all of the fits for the light minearal oil
-plt.figure(5)
+plt.figure()
 plt.plot(DataDF['Time'],DataDF['Voltage'],label="Data")
 plt.plot(DataTimeFull,DataAmpFull,'gx')
 plt.plot(DataDF['Time'],T2Func(DataDF['Time'],T2Fit.best_values['A'],T2Fit.best_values['T2']),label="Last 9 Fit",color='green')
 plt.plot(DataDF['Time'],T2Func(DataDF['Time'],T2Fit2.best_values['A'],T2Fit2.best_values['T2']),label="First 4 Fit",color='#7A0E71')
+plt.plot(DataDF['Time'],T2Func(DataDF['Time'],T2FitSingle.best_values['A'],T2FitSingle.best_values['T2']),label="1 Exp Fit")
 plt.plot(DataDF['Time'],TwoExponential(DataDF['Time'],T2FitSum.best_values['A1'],T2FitSum.best_values['T2_1'],T2FitSum.best_values['A2'],T2FitSum.best_values['T2_2']),label="2 Exp Fit",color='magenta')
-plt.title('Two-Exponential Fit To Spin-Echo Pulses To Find T2')
+plt.title('Comparison of different fits for light minearal oil')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
 plt.legend()
@@ -225,7 +239,7 @@ plt.plot(HMOtime,HMOamp,'rx')
 plt.title('Heavy Minearal Oil T2')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
-plt.show()
+plt.show(block=False)
 
 #* Fitting the heavy minearal oil data
 
@@ -235,6 +249,7 @@ HMOT2Params = Parameters()
 HMOT2Params.add('A',value=4.60,min=1e-10,vary=True)
 HMOT2Params.add('T2',value=0.073,min=1e-10,vary=True)
 HMOT2Fit = HMOT2Model.fit(HMOamp,params=HMOT2Params,time=HMOtime,weights=1/0.02)
+cprint('Heavy mineral oil, single exponential, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(HMOT2Fit.fit_report())
 HMOT2Fit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Heavy Minearal Oil T2 - Single Exponential')
 plt.show(block=False)
@@ -247,6 +262,7 @@ HMOT2Params2.add('T2_1',value=0.01,min=1e-10,vary=True)
 HMOT2Params2.add('A2',value=5,min=1e-10,vary=True)
 HMOT2Params2.add('T2_2',value=0.1,min=1e-10,vary=True)
 HMOT2Fit2 = HMOT2Model2.fit(HMOamp,params=HMOT2Params2,time=HMOtime,weights=1/0.02)
+cprint('Heavy mineral oil, two exponentials, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(HMOT2Fit2.fit_report())
 HMOT2Fit2.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Heavy Minearal Oil T2 - Two Exponentials')
 plt.show(block=False)
@@ -269,7 +285,6 @@ plt.show(block=False)
 
 
 #? First four
-
 HMOtimeFirstFour = np.array([ 0.10,6.80,13.60,20.40 ]) * 1e-3
 HMOampFirstFour = np.array( [ 6.56,4.60,3.36,2.56 ])
 HMOT2FirstFourModel = Model(T2Func)
@@ -278,12 +293,12 @@ HMOT2FirstFourParams.add('A',value=4.60,min=1e-10,vary=True)
 HMOT2FirstFourParams.add('T2',value=0.073,min=1e-10,vary=True)
 
 HMOT2FirstFourFit = HMOT2FirstFourModel.fit(HMOampFirstFour,params=HMOT2FirstFourParams,time=HMOtimeFirstFour,weights=1/0.02)
+cprint('Heavy mineral oil, single exponential, first four data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(HMOT2FirstFourFit.fit_report())
 HMOT2FirstFourFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Heavy Minearal Oil T2 - First Four Single Exp')
 plt.show(block=False)
 
 #? Last nine
-
 HMOtimeLastNine = np.array([ 40.80,47.62,54.42,61.20,68.00,74.70,81.60,88.40,95.20 ]) * 1e-3
 HMOampLastNine = np.array( [ 1.36,1.16,0.96,0.80,0.72,0.60,0.56,0.48,0.42 ])
 
@@ -292,6 +307,7 @@ HMOT2LastNineParams = Parameters()
 HMOT2LastNineParams.add('A',value=4.60,min=1e-10,vary=True)
 HMOT2LastNineParams.add('T2',value=0.073,min=1e-10,vary=True)
 HMOT2LastNineFit = HMOT2FirstFourModel.fit(HMOampLastNine,params=HMOT2LastNineParams,time=HMOtimeLastNine,weights=1/0.02)
+cprint('Heavy mineral oil, single exponential, last nine data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(HMOT2LastNineFit.fit_report())
 HMOT2LastNineFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Heavy Minearal Oil T2 - Last Nine Single Exp')
 plt.show(block=False)
@@ -302,8 +318,9 @@ plt.plot(HMODF['Time'],HMODF['Voltage'],label="Data")
 plt.plot(HMOtime,HMOamp,'gx')
 plt.plot(HMODF['Time'],T2Func(HMODF['Time'],HMOT2FirstFourFit.best_values['A'],HMOT2FirstFourFit.best_values['T2']),label="First Four",color='#7A0E71')
 plt.plot(HMODF['Time'],T2Func(HMODF['Time'],HMOT2LastNineFit.best_values['A'],HMOT2LastNineFit.best_values['T2']),label="Last Nine",color='green')
+plt.plot(HMODF['Time'],T2Func(HMODF['Time'],HMOT2Fit.best_values['A'],HMOT2Fit.best_values['T2']),label="1 Exp Fit",color='orange')
 plt.plot(HMODF['Time'],TwoExponential(HMODF['Time'],HMOT2Fit2.best_values['A1'],HMOT2Fit2.best_values['T2_1'],HMOT2Fit2.best_values['A2'],HMOT2Fit2.best_values['T2_2']),label="2 Exp Fit",color='magenta')
-plt.title('Comparison of exponential fits of HMO for T2')
+plt.title('Comparison of different fits for heavy minearal oil')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
 plt.legend()
@@ -319,12 +336,13 @@ GlycerinTime = np.array([ 0.10,6.00,12.00,18.00,24.00,29.95,36.00,42.00,48.00,54
 GlycerinAmp = np.array( [ 5.72,4.96,4.24,3.56,3.00,2.52,2.16,1.88,1.64,1.40,1.20,1.04,0.92,0.80,0.72,0.60,0.56 ])
 
 #* Plotting the Heavy mineral oil data
+plt.figure()
 plt.plot(GlycerinDF['Time'],GlycerinDF['Voltage'])
 plt.plot(GlycerinTime,GlycerinAmp,'rx')
 plt.title('Glycerin T2 Data')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
-plt.show()
+plt.show(block=False)
 
 
 #* Fitting the heavy minearal oil data
@@ -337,6 +355,7 @@ GlycerinT2Params.add('A',value=4.60,min=1e-10,vary=True)
 GlycerinT2Params.add('T2',value=0.073,min=1e-10,vary=True)
 
 GlycerinT2Fit = GlycerinT2Model.fit(GlycerinAmp,params=GlycerinT2Params,time=GlycerinTime,weights=1/0.02)
+cprint('Glycerin, single exponential, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(GlycerinT2Fit.fit_report())
 GlycerinT2Fit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Glycerin T2 - Single Exponential')
 plt.show(block=False)
@@ -350,6 +369,7 @@ GlycerinT2Params2.add('A2',value=5,min=1e-10,vary=True)
 GlycerinT2Params2.add('T2_2',value=0.1,min=1e-10,vary=True)
 
 GlycerinT2Fit2 = GlycerinT2Model2.fit(GlycerinAmp,params=GlycerinT2Params2,time=GlycerinTime,weights=1/0.02)
+cprint('Glycerin, two exponentials, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(GlycerinT2Fit2.fit_report())
 GlycerinT2Fit2.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Glycerin T2 - Two Exponentials')
 plt.show(block=False)
@@ -379,6 +399,7 @@ GlycerinT2FirstFourParams = Parameters()
 GlycerinT2FirstFourParams.add('A',value=4.60,min=1e-10,vary=True)
 GlycerinT2FirstFourParams.add('T2',value=0.073,min=1e-10,vary=True)
 GlycerinT2FirstFourFit = GlycerinT2FirstFourModel.fit(GlycerinAmpFirstFour,params=GlycerinT2FirstFourParams,time=GlycerinTimeFirstFour,weights=1/0.02)
+cprint('Glycerin, single exponential, first four data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(GlycerinT2FirstFourFit.fit_report())
 GlycerinT2FirstFourFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Glycerin T2 - First Four Single Exp')
 plt.show(block=False)
@@ -393,6 +414,7 @@ GlycerinT2LastNineParams = Parameters()
 GlycerinT2LastNineParams.add('A',value=4.60,min=1e-10,vary=True)
 GlycerinT2LastNineParams.add('T2',value=0.073,min=1e-10,vary=True)
 GlycerinT2LastNineFit = GlycerinT2FirstFourModel.fit(GlycerinAmpLastNine,params=GlycerinT2LastNineParams,time=GlycerinTimeLastNine,weights=1/0.02)
+cprint('Glycerin, single exponential, last nine data points',color='cyan',on_color='on_magenta',attrs=['bold'])
 print(GlycerinT2LastNineFit.fit_report())
 GlycerinT2LastNineFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Glycerin T2 - Last Nine Single Exp')
 plt.show(block=False)
@@ -404,12 +426,10 @@ plt.plot(GlycerinDF['Time'],GlycerinDF['Voltage'],label="Data")
 plt.plot(GlycerinTime,GlycerinAmp,'gx')
 plt.plot(GlycerinDF['Time'],T2Func(GlycerinDF['Time'],GlycerinT2FirstFourFit.best_values['A'],GlycerinT2FirstFourFit.best_values['T2']),label="First Four",color='#7A0E71')
 plt.plot(GlycerinDF['Time'],T2Func(GlycerinDF['Time'],GlycerinT2LastNineFit.best_values['A'],GlycerinT2LastNineFit.best_values['T2']),label="Last Nine",color='green')
+plt.plot(GlycerinDF['Time'],T2Func(GlycerinDF['Time'],GlycerinT2Fit.best_values['A'],GlycerinT2Fit.best_values['T2']),label="1 Exp Fit",color='orange')
 plt.plot(GlycerinDF['Time'],TwoExponential(GlycerinDF['Time'],GlycerinT2Fit2.best_values['A1'],GlycerinT2Fit2.best_values['T2_1'],GlycerinT2Fit2.best_values['A2'],GlycerinT2Fit2.best_values['T2_2']),label="2 Exp Fit",color='magenta')
-plt.title('Comparison of exponential fits of Glycerin for T2')
+plt.title('Comparison of different fits for glycerin')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
 plt.legend()
-plt.show(block=True)
-
-
-
+plt.show(block=False)
