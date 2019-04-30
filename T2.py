@@ -8,7 +8,7 @@ import scipy.stats as scistats
 from lmfit import Model, Parameters
 import pandas as pd
 import scipy.signal as scisig
-from termcolor import colored, cprint #* coloured terminal printing -- might be a pain on windows *_*
+from TermColor import colored, cprint #* coloured terminal printing -- might be a pain on windows *_*
 import statsmodels.stats.stattools as stats
 
 TitleFont = {'size':'24', 'color':'black', 'weight':'bold'} 
