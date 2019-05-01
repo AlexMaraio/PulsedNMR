@@ -456,7 +456,10 @@ AFTER EASTER DATA
 
 ---------------------------------------------------------------------------------------------------------------'''
 
+import os
+columns, rows = os.get_terminal_size(0)
 
+cprint('AFTER EASTER DATA' + '-'*(columns -17) +'\n',color='green',on_color='on_white',attrs=['bold','dark'])
 #? Light mineral oil sample 
 
 #* Importing the LMO T2 data
@@ -465,7 +468,7 @@ LMOAEDF =  pd.read_csv("./Data/T2/LMO_AfterEaster.csv",names = ['Time','Voltage'
 LMOAETime = np.array([ 0.10,11.80,23.80,36.00,48.00,59.95,71.70,83.70,95.60,107.80,119.70,131.70,144.0,155.5,167.5,179.6,191.9,203.9 ]) * 1e-3
 LMOAEAmp = np.array( [ 5.52,4.24,3.36,2.76,2.28,1.88,1.60,1.36,1.20,1.04,0.92,0.80,0.72,0.64,0.56,0.52,0.48,0.44 ])
 
-#* Plotting the Heavy mineral oil data
+#* Plotting the Light mineral oil data
 plt.figure()
 plt.plot(LMOAEDF['Time'],LMOAEDF['Voltage'])
 plt.plot(LMOAETime,LMOAEAmp,'rx')
@@ -475,7 +478,7 @@ plt.ylabel('Voltage (V)')
 plt.show(block=False)
 
 
-#* Fitting the heavy minearal oil data
+#* Fitting the Light minearal oil data
 
 #? Single exponential
 LMOAET2Model = Model(T2Func)
@@ -520,7 +523,7 @@ plt.legend()
 plt.show(block=False)
 
 
-#* Now doing the same comparison for the first four data points and the last nine data points, just like for the light minearal oil
+#* Now doing the same comparison for the first four data points and the last nine data points for the light minearal oil
 #? First four
 
 LMOAETimeFirstFour = np.array([0.10,11.80,23.80,36.00 ]) * 1e-3
@@ -554,7 +557,7 @@ LMOAET2LastNineFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisat
 plt.show(block=False)
 
 
-#! Comparison plot between the three different fits for heavy minearal oil
+#! Comparison plot between the three different fits for light minearal oil after easter
 plt.figure()
 plt.plot(LMOAEDF['Time'],LMOAEDF['Voltage'],label="Data")
 plt.plot(LMOAETime,LMOAEAmp,'gx')
@@ -566,4 +569,229 @@ plt.title('Comparison of different fits for LMOAE')
 plt.xlabel('Time (s)')
 plt.ylabel('Voltage (V)')
 plt.legend()
+plt.show(block=True)
+
+
+
+#! Heavy mineral oil sample 
+
+#* Importing the HMO T2 data
+HMOAEDF =  pd.read_csv("./Data/T2/HMO_AfterEaster.csv",names = ['Time','Voltage'],usecols = [3,4])
+
+HMOAETime = np.array([ 0.10,6.00,12.00,18.00,24.00,29.95,36.00,41.95,48.00,54.00,59.50,66.00,72.05,78.00,84.03,90.00,96.00]) * 1e-3
+HMOAEAmp = np.array( [ 6.64,4.92,3.72,2.88,2.28,1.88,1.60,1.36,1.16,1.04,0.88,0.80,0.72,0.64,0.56,0.52,0.48])
+
+#* Plotting the Heavy mineral oil data
+plt.figure()
+plt.plot(HMOAEDF['Time'],HMOAEDF['Voltage'])
+plt.plot(HMOAETime,HMOAEAmp,'rx')
+plt.title('HMO After Easter T2 Data')
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
 plt.show(block=False)
+
+
+#* Fitting the heavy minearal oil data
+
+#? Single exponential
+HMOAET2Model = Model(T2Func)
+HMOAET2Params = Parameters()
+
+HMOAET2Params.add('A',value=4.60,min=1e-10,vary=True)
+HMOAET2Params.add('T2',value=0.073,min=1e-10,vary=True)
+
+HMOAET2Fit = HMOAET2Model.fit(HMOAEAmp,params=HMOAET2Params,time=HMOAETime,weights=1/0.02)
+cprint('Heavy Mineral Oil after Easter, single exponential, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(colored('The Durbin-Watson test for this sample is ' + str(stats.durbin_watson(HMOAET2Fit.residual)),color='blue',attrs=['bold']))
+print(HMOAET2Fit.fit_report())
+HMOAET2Fit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='HMO AE T2 - Single Exponential')
+plt.show(block=False)
+
+#? Two exponentials
+HMOAET2Model2 = Model(TwoExponential) 
+HMOAET2Params2 = Parameters()
+HMOAET2Params2.add('A1',value=4,min=1e-10,vary=True)
+HMOAET2Params2.add('T2_1',value=0.01,min=1e-10,vary=True)
+HMOAET2Params2.add('A2',value=5,min=1e-10,vary=True)
+HMOAET2Params2.add('T2_2',value=0.1,min=1e-10,vary=True)
+
+HMOAET2Fit2 = HMOAET2Model2.fit(HMOAEAmp,params=HMOAET2Params2,time=HMOAETime,weights=1/0.02)
+cprint('HMOAE, two exponentials, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(colored('The Durbin-Watson test for this sample is ' + str(stats.durbin_watson(HMOAET2Fit2.residual)),color='blue',attrs=['bold']))
+print(HMOAET2Fit2.fit_report())
+HMOAET2Fit2.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='HMO AE T2 - Two Exponentials')
+plt.show(block=False)
+
+
+#! Plotting the single and double exponential functions to compare
+plt.figure()
+plt.plot(HMOAEDF['Time'],HMOAEDF['Voltage'],label="Data")
+plt.plot(HMOAETime,HMOAEAmp,'gx')
+plt.plot(HMOAEDF['Time'],T2Func(HMOAEDF['Time'],HMOAET2Fit.best_values['A'],HMOAET2Fit.best_values['T2']),label="1 Exp Fit",color='green')
+plt.plot(HMOAEDF['Time'],TwoExponential(HMOAEDF['Time'],HMOAET2Fit2.best_values['A1'],HMOAET2Fit2.best_values['T2_1'],HMOAET2Fit2.best_values['A2'],HMOAET2Fit2.best_values['T2_2']),label="2 Exp Fit",color='magenta')
+plt.title('Comparison of single vs two exponential fit of HMOAE for T2')
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
+plt.legend()
+plt.show(block=False)
+
+
+#* Now doing the same comparison for the first four data points and the last nine data points, just like for the light minearal oil
+#? First four
+
+HMOAETimeFirstFour = np.array([0.10,6.00,12.00,18.00 ]) * 1e-3
+HMOAEAmpFirstFour = np.array( [  6.64,4.92,3.72,2.88])
+
+HMOAET2FirstFourModel = Model(T2Func)
+HMOAET2FirstFourParams = Parameters()
+HMOAET2FirstFourParams.add('A',value=4.60,min=1e-10,vary=True)
+HMOAET2FirstFourParams.add('T2',value=0.073,min=1e-10,vary=True)
+HMOAET2FirstFourFit = HMOAET2FirstFourModel.fit(HMOAEAmpFirstFour,params=HMOAET2FirstFourParams,time=HMOAETimeFirstFour,weights=1/0.02)
+cprint('HMOAE, single exponential, first four data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(colored('The Durbin-Watson test for this sample is ' + str(stats.durbin_watson(HMOAET2FirstFourFit.residual)),color='blue',attrs=['bold']))
+print(HMOAET2FirstFourFit.fit_report())
+HMOAET2FirstFourFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='HMOAE T2 - First Four Single Exp')
+plt.show(block=False)
+
+#? Last nine
+
+HMOAETimeLastNine = np.array([ 48.00,54.00,59.50,66.00,72.05,78.00,84.03,90.00,96.00  ]) * 1e-3
+HMOAEAmpLastNine = np.array( [ 1.16,1.04,0.88,0.80,0.72,0.64,0.56,0.52,0.48 ])
+
+HMOAET2LastNineModel = Model(T2Func)
+HMOAET2LastNineParams = Parameters()
+HMOAET2LastNineParams.add('A',value=4.60,min=1e-10,vary=True)
+HMOAET2LastNineParams.add('T2',value=0.073,min=1e-10,vary=True)
+HMOAET2LastNineFit = HMOAET2FirstFourModel.fit(HMOAEAmpLastNine,params=HMOAET2LastNineParams,time=HMOAETimeLastNine,weights=1/0.02)
+cprint('HMOAE, single exponential, last nine data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(colored('The Durbin-Watson test for this sample is ' + str(stats.durbin_watson(HMOAET2LastNineFit.residual)),color='blue',attrs=['bold']))
+print(HMOAET2LastNineFit.fit_report())
+HMOAET2LastNineFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='HMOAE T2 - Last Nine Single Exp')
+plt.show(block=False)
+
+
+#! Comparison plot between the three different fits for heavy minearal oil
+plt.figure()
+plt.plot(HMOAEDF['Time'],HMOAEDF['Voltage'],label="Data")
+plt.plot(HMOAETime,HMOAEAmp,'gx')
+plt.plot(HMOAEDF['Time'],T2Func(HMOAEDF['Time'],HMOAET2FirstFourFit.best_values['A'],HMOAET2FirstFourFit.best_values['T2']),label="First Four",color='#7A0E71')
+plt.plot(HMOAEDF['Time'],T2Func(HMOAEDF['Time'],HMOAET2LastNineFit.best_values['A'],HMOAET2LastNineFit.best_values['T2']),label="Last Nine",color='green')
+plt.plot(HMOAEDF['Time'],T2Func(HMOAEDF['Time'],HMOAET2Fit.best_values['A'],HMOAET2Fit.best_values['T2']),label="1 Exp Fit",color='orange')
+plt.plot(HMOAEDF['Time'],TwoExponential(HMOAEDF['Time'],HMOAET2Fit2.best_values['A1'],HMOAET2Fit2.best_values['T2_1'],HMOAET2Fit2.best_values['A2'],HMOAET2Fit2.best_values['T2_2']),label="2 Exp Fit",color='magenta')
+plt.title('Comparison of different fits for HMOAE')
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
+plt.legend()
+plt.show(block=True)
+
+
+#? Glycerin sample 
+
+#* Importing the HMO T2 data
+GlycerinAEDF =  pd.read_csv("./Data/T2/HMO_AfterEaster.csv",names = ['Time','Voltage'],usecols = [3,4])
+
+GlycerinAETime = np.array([ 0.10,6.00,12.00,18.00,24.00,29.95,36.00,41.95,48.00,54.00,59.50,66.00,72.05,78.00,84.03,90.00,96.00]) * 1e-3
+GlycerinAEAmp = np.array( [ 6.64,4.92,3.72,2.88,2.28,1.88,1.60,1.36,1.16,1.04,0.88,0.80,0.72,0.64,0.56,0.52,0.48])
+
+#* Plotting the Glycerin data
+plt.figure()
+plt.plot(GlycerinAEDF['Time'],GlycerinAEDF['Voltage'])
+plt.plot(GlycerinAETime,GlycerinAEAmp,'rx')
+plt.title('Glycerin After Easter T2 Data')
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
+plt.show(block=False)
+
+
+#* Fitting glycerin data
+
+#? Single exponential
+GlycerinAET2Model = Model(T2Func)
+GlycerinAET2Params = Parameters()
+
+GlycerinAET2Params.add('A',value=4.60,min=1e-10,vary=True)
+GlycerinAET2Params.add('T2',value=0.073,min=1e-10,vary=True)
+
+GlycerinAET2Fit = GlycerinAET2Model.fit(GlycerinAEAmp,params=GlycerinAET2Params,time=GlycerinAETime,weights=1/0.02)
+cprint('Glycerin after Easter, single exponential, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(colored('The Durbin-Watson test for this sample is ' + str(stats.durbin_watson(GlycerinAET2Fit.residual)),color='blue',attrs=['bold']))
+print(GlycerinAET2Fit.fit_report())
+GlycerinAET2Fit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Glycerin AE T2 - Single Exponential')
+plt.show(block=False)
+
+#? Two exponentials
+GlycerinAET2Model2 = Model(TwoExponential) 
+GlycerinAET2Params2 = Parameters()
+GlycerinAET2Params2.add('A1',value=4,min=1e-10,vary=True)
+GlycerinAET2Params2.add('T2_1',value=0.01,min=1e-10,vary=True)
+GlycerinAET2Params2.add('A2',value=5,min=1e-10,vary=True)
+GlycerinAET2Params2.add('T2_2',value=0.1,min=1e-10,vary=True)
+
+GlycerinAET2Fit2 = GlycerinAET2Model2.fit(GlycerinAEAmp,params=GlycerinAET2Params2,time=GlycerinAETime,weights=1/0.02)
+cprint('GlycerinAE, two exponentials, all data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(colored('The Durbin-Watson test for this sample is ' + str(stats.durbin_watson(GlycerinAET2Fit2.residual)),color='blue',attrs=['bold']))
+print(GlycerinAET2Fit2.fit_report())
+GlycerinAET2Fit2.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='Glycerin AE T2 - Two Exponentials')
+plt.show(block=False)
+
+
+#! Plotting the single and double exponential functions to compare
+plt.figure()
+plt.plot(GlycerinAEDF['Time'],GlycerinAEDF['Voltage'],label="Data")
+plt.plot(GlycerinAETime,GlycerinAEAmp,'gx')
+plt.plot(GlycerinAEDF['Time'],T2Func(GlycerinAEDF['Time'],GlycerinAET2Fit.best_values['A'],GlycerinAET2Fit.best_values['T2']),label="1 Exp Fit",color='green')
+plt.plot(GlycerinAEDF['Time'],TwoExponential(GlycerinAEDF['Time'],GlycerinAET2Fit2.best_values['A1'],GlycerinAET2Fit2.best_values['T2_1'],GlycerinAET2Fit2.best_values['A2'],GlycerinAET2Fit2.best_values['T2_2']),label="2 Exp Fit",color='magenta')
+plt.title('Comparison of single vs two exponential fit of GlycerinAE for T2')
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
+plt.legend()
+plt.show(block=False)
+
+
+#* Now doing the same comparison for the first four data points and the last nine data points glycerin
+#? First four
+
+GlycerinAETimeFirstFour = np.array([0.10,6.00,12.00,18.00 ]) * 1e-3
+GlycerinAEAmpFirstFour = np.array( [  6.64,4.92,3.72,2.88])
+
+GlycerinAET2FirstFourModel = Model(T2Func)
+GlycerinAET2FirstFourParams = Parameters()
+GlycerinAET2FirstFourParams.add('A',value=4.60,min=1e-10,vary=True)
+GlycerinAET2FirstFourParams.add('T2',value=0.073,min=1e-10,vary=True)
+GlycerinAET2FirstFourFit = GlycerinAET2FirstFourModel.fit(GlycerinAEAmpFirstFour,params=GlycerinAET2FirstFourParams,time=GlycerinAETimeFirstFour,weights=1/0.02)
+cprint('GlycerinAE, single exponential, first four data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(colored('The Durbin-Watson test for this sample is ' + str(stats.durbin_watson(GlycerinAET2FirstFourFit.residual)),color='blue',attrs=['bold']))
+print(GlycerinAET2FirstFourFit.fit_report())
+GlycerinAET2FirstFourFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='GlycerinAE T2 - First Four Single Exp')
+plt.show(block=False)
+
+#? Last nine
+
+GlycerinAETimeLastNine = np.array([ 48.00,54.00,59.50,66.00,72.05,78.00,84.03,90.00,96.00  ]) * 1e-3
+GlycerinAEAmpLastNine = np.array( [ 1.16,1.04,0.88,0.80,0.72,0.64,0.56,0.52,0.48 ])
+
+GlycerinAET2LastNineModel = Model(T2Func)
+GlycerinAET2LastNineParams = Parameters()
+GlycerinAET2LastNineParams.add('A',value=4.60,min=1e-10,vary=True)
+GlycerinAET2LastNineParams.add('T2',value=0.073,min=1e-10,vary=True)
+GlycerinAET2LastNineFit = GlycerinAET2FirstFourModel.fit(GlycerinAEAmpLastNine,params=GlycerinAET2LastNineParams,time=GlycerinAETimeLastNine,weights=1/0.02)
+cprint('GlycerinAE, single exponential, last nine data points',color='cyan',on_color='on_magenta',attrs=['bold'])
+print(colored('The Durbin-Watson test for this sample is ' + str(stats.durbin_watson(GlycerinAET2LastNineFit.residual)),color='blue',attrs=['bold']))
+print(GlycerinAET2LastNineFit.fit_report())
+GlycerinAET2LastNineFit.plot(show_init=False,xlabel='Time (s)',ylabel='Net Magnetisation',yerr=0.02,numpoints=10000,title='GlycerinAE T2 - Last Nine Single Exp')
+plt.show(block=False)
+
+
+#! Comparison plot between the three different fits for glycerin
+plt.figure()
+plt.plot(GlycerinAEDF['Time'],GlycerinAEDF['Voltage'],label="Data")
+plt.plot(GlycerinAETime,GlycerinAEAmp,'gx')
+plt.plot(GlycerinAEDF['Time'],T2Func(GlycerinAEDF['Time'],GlycerinAET2FirstFourFit.best_values['A'],GlycerinAET2FirstFourFit.best_values['T2']),label="First Four",color='#7A0E71')
+plt.plot(GlycerinAEDF['Time'],T2Func(GlycerinAEDF['Time'],GlycerinAET2LastNineFit.best_values['A'],GlycerinAET2LastNineFit.best_values['T2']),label="Last Nine",color='green')
+plt.plot(GlycerinAEDF['Time'],T2Func(GlycerinAEDF['Time'],GlycerinAET2Fit.best_values['A'],GlycerinAET2Fit.best_values['T2']),label="1 Exp Fit",color='orange')
+plt.plot(GlycerinAEDF['Time'],TwoExponential(GlycerinAEDF['Time'],GlycerinAET2Fit2.best_values['A1'],GlycerinAET2Fit2.best_values['T2_1'],GlycerinAET2Fit2.best_values['A2'],GlycerinAET2Fit2.best_values['T2_2']),label="2 Exp Fit",color='magenta')
+plt.title('Comparison of different fits for GlycerinAE')
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
+plt.legend()
+plt.show(block=True)
