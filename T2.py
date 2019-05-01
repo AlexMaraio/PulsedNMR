@@ -688,10 +688,10 @@ plt.show(block=True)
 #? Glycerin sample 
 
 #* Importing the HMO T2 data
-GlycerinAEDF =  pd.read_csv("./Data/T2/HMO_AfterEaster.csv",names = ['Time','Voltage'],usecols = [3,4])
+GlycerinAEDF =  pd.read_csv("./Data/T2/Glycerin_AfterEaster.csv",names = ['Time','Voltage'],usecols = [3,4])
 
-GlycerinAETime = np.array([ 0.10,6.00,12.00,18.00,24.00,29.95,36.00,41.95,48.00,54.00,59.50,66.00,72.05,78.00,84.03,90.00,96.00]) * 1e-3
-GlycerinAEAmp = np.array( [ 6.64,4.92,3.72,2.88,2.28,1.88,1.60,1.36,1.16,1.04,0.88,0.80,0.72,0.64,0.56,0.52,0.48])
+GlycerinAETime = np.array([ 0.08,6.00,12.00,18.00,24.00,30.00,36.00,42.00,47.95,53.95,60.00,65.90,72.00,77.95,84.05,90.00,96.00]) * 1e-3
+GlycerinAEAmp = np.array( [ 5.92,5.00,4.28,3.60,3.04,2.56,2.20,1.88,1.60,1.40,1.20,1.04,0.88,0.76,0.68,0.60,0.52])
 
 #* Plotting the Glycerin data
 plt.figure()
@@ -751,8 +751,8 @@ plt.show(block=False)
 #* Now doing the same comparison for the first four data points and the last nine data points glycerin
 #? First four
 
-GlycerinAETimeFirstFour = np.array([0.10,6.00,12.00,18.00 ]) * 1e-3
-GlycerinAEAmpFirstFour = np.array( [  6.64,4.92,3.72,2.88])
+GlycerinAETimeFirstFour = np.array([ 0.08,6.00,12.00,18.00 ]) * 1e-3
+GlycerinAEAmpFirstFour = np.array( [ 5.92,5.00,4.28,3.60 ])
 
 GlycerinAET2FirstFourModel = Model(T2Func)
 GlycerinAET2FirstFourParams = Parameters()
@@ -767,8 +767,8 @@ plt.show(block=False)
 
 #? Last nine
 
-GlycerinAETimeLastNine = np.array([ 48.00,54.00,59.50,66.00,72.05,78.00,84.03,90.00,96.00  ]) * 1e-3
-GlycerinAEAmpLastNine = np.array( [ 1.16,1.04,0.88,0.80,0.72,0.64,0.56,0.52,0.48 ])
+GlycerinAETimeLastNine = np.array([ 47.95,53.95,60.00,65.90,72.00,77.95,84.05,90.00,96.00 ]) * 1e-3
+GlycerinAEAmpLastNine = np.array( [ 1.60,1.40,1.20,1.04,0.88,0.76,0.68,0.60,0.52 ])
 
 GlycerinAET2LastNineModel = Model(T2Func)
 GlycerinAET2LastNineParams = Parameters()
