@@ -457,7 +457,7 @@ AFTER EASTER DATA
 ---------------------------------------------------------------------------------------------------------------'''
 
 import os
-columns, rows = os.get_terminal_size(0)
+columns, rows = os.get_terminal_size()
 
 cprint('AFTER EASTER DATA' + '-'*(columns -17) +'\n',color='green',on_color='on_white',attrs=['bold','dark'])
 #? Light mineral oil sample 
