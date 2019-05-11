@@ -1,3 +1,18 @@
+FC43 T1 Measurement 09-May-1970
+
+Freq = 19.74571 MHz
+X = -2.05
+Y = 0.00
+Z = 0.36
+Z^2 = -2.79
+
+A_len = 8.20 us
+B_len = 4.10 us
+
+P = 1.0 s
+
+
+
 Flourinert FC-70 taken 02-May-19
 
 FC70LongFIFCh1 and FC70LongFIFCh1 were taken at:
@@ -20,6 +35,7 @@ Perflourpolyether PTS-1
 
 Freq = 19.72790 MHz
 A_len = 2.30 us
+tau = 0.0030 s
 P = 800.0 ms
 
 Fourier Transform Freq = 19.73135 MHz
@@ -28,19 +44,7 @@ Perflourpolyether HT-110
 
 Freq = 19.72826 MHz
 A_len = 2.3 us
-P = 800.0 us
+tau = 0.0030 s
+P = 800.0 ms
 
-
-FC43 T1 Measurement 09-May-1970
-
-Freq = 19.74571 MHz
-X = -2.05
-Y = 0.00
-Z = 0.36
-Z^2 = -2.79
-
-A_len = 8.20 us
-B_len = 4.10 us
-
-P = 1.0 s
 
