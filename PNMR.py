@@ -4,9 +4,10 @@
     and then extract T1, which is the spin-lattice relaxation time.
 '''
 import matplotlib.pyplot as plt
+from matplotlib import container
 import numpy as np
 import seaborn as sns
-sns.set()
+sns.set(font_scale=1.35)
 import scipy.stats as scistats
 from lmfit import Model, Parameters
 
@@ -37,11 +38,36 @@ T1Fit.plot(show_init=False,yerr=AmplitudeError,xlabel='Time (s)',ylabel='Net Mag
 plt.show(block=False)
 
 
+plt.figure()
+plt.plot(Times,T1Func(Times,T1Fit.best_values['M0'],T1Fit.best_values['T1']),label="Fit",linewidth=2)
+#plt.plot(Times,Amplitude,'gx',label="Data",linewidth=2)
+plt.errorbar(Times,Amplitude,fmt='gx',yerr=0.08,label="Data",linewidth=2,markersize=7.5)
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (V)')
+plt.title('Net Magnetisation as a Function of Time')
+
+ax = plt.gca()
+
+handles, labels = ax.get_legend_handles_labels()
+handles = [h[0] if isinstance(h, container.ErrorbarContainer) else h for h in handles]
+
+ax.legend(handles, labels)
+#plt.legend()
+plt.show()
+
+
+
 #! Heavy mineral oil T1 decay time
 TimesHMO = np.concatenate((np.linspace(0.0010,0.0220,22), np.linspace(0.0240,0.0600,37)))
 AmplitudeHMO = np.array( [ -6.16,-5.74,-5.37,-5.02,-4.68,-4.32,-3.98,-3.65,-3.37,-3.06,-2.77,-2.50,-2.26,-1.99,-1.77,-1.56,-1.36,-1.10,-0.881,-0.686,-0.492,-0.310, \
     0.152,0.330,0.498,0.660,0.808,0.951,1.10,1.23,1.37,1.50,1.63,1.74,1.84,1.96,2.07,2.15,2.26,2.35,2.44,2.53,2.63,2.71,2.79,2.87,2.96,3.03,3.11,3.19,3.27,3.32,3.41,3.47,3.54,3.61,3.65,3.72,3.78 ])
 AmplitudeErrorHMO = np.array([0.02]*59)
+
+#! Now going from slightly later to see if this reduces any error
+TimesHMO = np.concatenate((np.linspace(0.0070,0.0220,16), np.linspace(0.0240,0.0600,37)))
+AmplitudeHMO = np.array( [-3.98,-3.65,-3.37,-3.06,-2.77,-2.50,-2.26,-1.99,-1.77,-1.56,-1.36,-1.10,-0.881,-0.686,-0.492,-0.310, \
+    0.152,0.330,0.498,0.660,0.808,0.951,1.10,1.23,1.37,1.50,1.63,1.74,1.84,1.96,2.07,2.15,2.26,2.35,2.44,2.53,2.63,2.71,2.79,2.87,2.96,3.03,3.11,3.19,3.27,3.32,3.41,3.47,3.54,3.61,3.65,3.72,3.78 ])
+AmplitudeErrorHMO = np.array([0.02]*53)
 
 T1HMOModel = Model(T1Func)
 T1HMOParams = Parameters()
@@ -50,7 +76,7 @@ T1HMOParams.add('M0',value=7,min=0,vary=True)
 T1HMOParams.add('T1',value=3e-3,min=0,vary=True)
 
 T1HMOFit = T1HMOModel.fit(AmplitudeHMO,params=T1HMOParams,time=TimesHMO,weights=1./AmplitudeErrorHMO)
-print(T1Fit.fit_report())
+print(T1HMOFit.fit_report())
 T1HMOFit.plot(show_init=False,yerr=AmplitudeErrorHMO,xlabel='Time (s)',ylabel='Net Magnetisation',title="Heavy Minearal Oil T1")
 plt.show(block=False)
 
@@ -71,3 +97,4 @@ T1GlycerinFit = T1GlycerinModel.fit(AmplitudeGlycerin,params=T1GlycerinParams,ti
 print(T1GlycerinFit.fit_report())
 T1GlycerinFit.plot(show_init=False,yerr=AmplitudeErrorGlycerin,xlabel='Time (s)',ylabel='Net Magnetisation',title="Glycerin T1")
 plt.show(block=False)
+
